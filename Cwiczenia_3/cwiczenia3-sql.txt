@@ -1,0 +1,86 @@
+CREATE SCHEMA rozliczenia;
+
+CREATE TABLE rozliczenia.pracownicy(id_pracownika INT PRIMARY KEY, imie VARCHAR(20), nazwisko VARCHAR(30), adres VARCHAR(50), telefon INT);
+CREATE TABLE rozliczenia.godziny(id_godziny INT PRIMARY KEY, data DATE, liczba_godzin INT, id_pracownika INT NOT NULL);
+CREATE TABLE rozliczenia.pensje(id_pensji INT PRIMARY KEY, stanowisko VARCHAR(50), kwota REAL, id_premii INT NOT NULL);
+CREATE TABLE rozliczenia.premie(id_premii INT PRIMARY KEY, rodzaj VARCHAR(50), kwota REAL);
+
+ALTER TABLE rozliczenia.godziny
+ADD CONSTRAINT fk_pracownicy_godziny
+FOREIGN KEY (id_pracownika)
+REFERENCES rozliczenia.pracownicy(id_pracownika);
+
+ALTER TABLE rozliczenia.pensje
+ADD CONSTRAINT fk_premie_pensje
+FOREIGN KEY (id_premii)
+REFERENCES rozliczenia.premie(id_premii);
+
+INSERT INTO rozliczenia.pracownicy(id_pracownika, imie, nazwisko, adres, telefon)
+VALUES 
+(1, 'Jan', 'Kowalski', 'ul. Prosta 1, Warszawa', 123456789),
+(2, 'Anna', 'Nowak', 'ul. Kwiatowa 2, Kraków', 987654321),
+(3, 'Piotr', 'Dąbrowski', 'ul. Słoneczna 3, Gdańsk', 111222333),
+(4, 'Maria', 'Wójcik', 'ul. Brzozowa 4, Poznań', 444555666),
+(5, 'Andrzej', 'Kaczmarek', 'ul. Polna 5, Wrocław', 777888999),
+(6, 'Magdalena', 'Grabowska', 'ul. Jagodowa 6, Łódź', 222333444),
+(7, 'Tomasz', 'Zawisza', 'ul. Radosna 7, Szczecin', 555666777),
+(8, 'Katarzyna', 'Piotrowska', 'ul. Słowackiego 8, Lublin', 999888777),
+(9, 'Michał', 'Lis', 'ul. Mickiewicza 9, Białystok', 555444333),
+(10, 'Ewa', 'Nowacka', 'ul. Leśna 10, Katowice', 111999888);
+
+INSERT INTO rozliczenia.godziny(id_godziny, data, liczba_godzin, id_pracownika)
+VALUES
+(1, '2023-10-15', 7, 4),
+(2, '2023-12-05', 6, 10),
+(3, '2023-11-21', 8, 5),
+(4, '2023-09-03', 7, 1),
+(5, '2023-08-27', 7, 9),
+(6, '2023-07-11', 6, 7),
+(7, '2023-04-18', 8, 3),
+(8, '2023-06-30', 7, 2),
+(9, '2023-03-09', 8, 6),
+(10, '2023-01-14', 7, 8);
+
+INSERT INTO rozliczenia.premie(id_premii, rodzaj, kwota)
+VALUES
+(101, 'Bonus za wyniki', 500.00),
+(102, 'Premia świąteczna', 300.50),
+(103, 'Nagroda za staż pracy', 250.75),
+(104, 'Premia za wydajność', 400.25),
+(105, 'Bonus jubileuszowy', 600.80),
+(106, 'Nagroda za najlepszy projekt', 450.60),
+(107, 'Premia za pracę nadgodzinową', 350.75),
+(108, 'Nagroda za projekt graficzny', 200.90),
+(109, 'Premia za dobre wyniki rekrutacji', 350.70),
+(110, 'Nagroda za najlepszy serwis', 400.45);
+
+INSERT INTO rozliczenia.pensje(id_pensji, stanowisko, kwota, id_premii)
+VALUES
+(1, 'Kierownik', 5500.75, 101),
+(2, 'Programista', 4200.50, 102),
+(3, 'Specjalista ds. marketingu', 3600.25, 103),
+(4, 'Analityk danych', 4800.80, 104),
+(5, 'Księgowy', 3900.60, 105),
+(6, 'Inżynier sprzedaży', 4100.75, 106),
+(7, 'Asystentka biura', 3200.40, 107),
+(8, 'Grafik komputerowy', 4300.90, 108),
+(9, 'Specjalista ds. HR', 3700.70, 109),
+(10, 'Technik serwisu', 4000.45, 110);
+
+SELECT nazwisko, adres
+FROM rozliczenia.pracownicy;
+
+SELECT DATE_PART('dow', data) AS dzien_tygodnia, 
+TO_CHAR(data,'day') as dzien_tygodnia_slownie,
+DATE_PART('month', data) AS miesiac,
+TO_CHAR(data,'month') as miesiac_slownie
+FROM rozliczenia.godziny;
+
+ALTER TABLE rozliczenia.pensje
+RENAME COLUMN kwota TO kwota_brutto;
+
+ALTER TABLE rozliczenia.pensje
+ADD COLUMN kwota_netto REAL;
+
+UPDATE rozliczenia.pensje
+SET kwota_netto = rozliczenia.pensje.kwota_brutto/1.23;
