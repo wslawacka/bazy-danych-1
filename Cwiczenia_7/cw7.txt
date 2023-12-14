@@ -1,0 +1,80 @@
+1. Napisz procedurę wypisującą do konsoli ciąg Fibonacciego. Procedura musi przyjmować jako 
+argument wejściowy liczbę n. Generowanie ciągu Fibonacciego musi zostać 
+zaimplementowane jako osobna funkcja, wywoływana przez procedurę. 
+
+CREATE FUNCTION tworzenie_ciagu_fibonnaciego(n INT)
+RETURNS SETOF INT AS $$
+DECLARE
+    a INT := 0;
+    b INT := 1;
+    i INT := 0;
+BEGIN
+    WHILE i < n LOOP
+        RETURN NEXT a;
+        i := i + 1;
+        a := a + b;
+        b := a - b;
+    END LOOP;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE PROCEDURE fibonacci(n INT)
+LANGUAGE plpgsql AS $$
+DECLARE
+    f INT;
+BEGIN
+    RAISE NOTICE 'Pierwsze % elementow ciagu Fibonacciego:', n;
+
+    FOR f IN SELECT * FROM tworzenie_ciagu_fibonnaciego(n) LOOP
+        RAISE NOTICE '%', f;
+    END LOOP;
+END;
+$$;
+
+2. Napisz trigger DML, który po wprowadzeniu danych do tabeli Persons zmodyfikuje nazwisko 
+tak, aby było napisane dużymi literami. 
+
+CREATE FUNCTION modyfikacja_nazwiska()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.lastname = UPPER(NEW.lastname);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER modyfikacja_nazwiska_trigger
+    BEFORE INSERT OR UPDATE
+    ON person.person
+    FOR EACH ROW
+EXECUTE FUNCTION modyfikacja_nazwiska();
+
+3. Przygotuj trigger ‘taxRateMonitoring’, który wyświetli komunikat o błędzie, jeżeli nastąpi 
+zmiana wartości w polu ‘TaxRate’ o więcej niż 30%.
+
+CREATE FUNCTION checkTaxRateChange()
+RETURNS TRIGGER AS $$
+DECLARE
+    old_tax DECIMAL;
+    new_tax DECIMAL;
+    max_change DECIMAL := 0.3; 
+BEGIN
+    old_tax := OLD.TaxRate;
+    new_tax := NEW.TaxRate;
+
+    IF old_tax IS NOT NULL AND new_tax IS NOT NULL THEN
+        IF ABS(new_tax- old_tax) / old_tax > max_change THEN
+            RAISE EXCEPTION 'zmiana wartości TaxRate o więcej niż 30%% jest zabroniona';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER taxRateMonitoring
+BEFORE UPDATE OF TaxRate ON Sales.SalesTaxRate
+FOR EACH ROW
+WHEN (OLD.TaxRate IS DISTINCT FROM NEW.TaxRate)
+EXECUTE FUNCTION checkTaxRateChange();
