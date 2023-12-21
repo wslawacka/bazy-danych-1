@@ -1,0 +1,39 @@
+CREATE TABLE TempEmployeeInfo
+(
+    id INT PRIMARY KEY,
+    imie VARCHAR(20),
+    drugie_imie VARCHAR(20),
+    nazwisko VARCHAR(20),
+    przyrostek VARCHAR(20),
+    najwyzsza_stawka  DECIMAL(10, 2)
+);
+
+
+WITH MaxRate AS (SELECT person.businessentityid AS id,
+                        person.firstname AS imie,
+                        person.middlename AS drugie_imie,
+                        person.lastname AS nazwisko,
+                        person.suffix AS przyrostek,
+                        MAX(payhistory.rate) AS najwyzsza_stawka
+                 FROM person.person person
+                          JOIN humanresources.employeepayhistory payhistory
+                               ON person.businessentityid = payhistory.businessentityid
+                 GROUP BY person.businessentityid
+                 ORDER BY id)
+INSERT
+INTO TempEmployeeInfo (id, full_name, max_rate)
+SELECT *
+FROM MaxRate;
+
+
+WITH OperatingTerritory AS (SELECT customer.CustomerID  AS customerid,
+                             customer.TerritoryID AS customerterritoryid,
+                             CONCAT(person.FirstName, ' ', person.LastName) AS salespersoninthisteritory
+                      FROM sales.customer customer
+                               JOIN
+                           sales.salesperson sales_person ON customer.TerritoryID = sales_person.TerritoryID
+                               JOIN
+                           person.person person ON sales_person.BusinessEntityID = person.BusinessEntityID)
+
+SELECT *
+FROM OperatingTerritory;
