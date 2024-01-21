@@ -1,0 +1,47 @@
+Opisz różnicę w wynikach, z czego ona wynika? (do zapytania z indeksami oraz bez indeksów)
+
+Planning Time:
+Przed indeksami - 2.685 ms
+Po indeksach - 0.179 ms
+Różnica w czasie planowania wynika z tego, że indeksy pozwalają na bardziej efektywne przeglądanie danych i szybsze tworzenie planu wykonania.
+
+Execution Time:
+Przed indeksami - 4.865 ms
+Po indeksach - 6.268 ms
+Różnica jest stosunkowo niewielka w porównaniu do znacznej poprawy w czasie planowania. Przy niewielkim rozmiarze danych różnice w czasie wykonania mogą być minimalne lub nawet wynikać z błędów pomiarowych.
+
+Rodzaj operacji:
+Przed indeksami: Seq Scan (pełne skanowanie sekwencyjne) dla obu tabel
+Po indeksach: Bitmap Heap Scan i Bitmap Index Scan dla tabeli "customer"
+Po dodaniu indeksów zapytanie korzysta z bardziej zaawansowanych operacji na indeksach, co prowadzi do efektywniejszego dostępu do danych.
+
+a. Napisz zapytanie, które wykorzystuje transakcję (zaczyna ją), a następnie aktualizuje 
+cenę produktu o ProductID równym 680 w tabeli Produc`on.Product o 10% i 
+następnie zatwierdza transakcję.
+
+BEGIN TRANSACTION;
+
+UPDATE Production.Product
+SET Price = Price * 1.1
+WHERE ProductID = 680;
+
+COMMIT;
+
+b. Napisz zapytanie, które zaczyna transakcję, usuwa produkt o ProductID równym 707 
+z tabeli Produc`on. Product, ale następnie wycofuje transakcję.
+
+BEGIN TRANSACTION;
+
+DELETE FROM Production.Product
+WHERE ProductID = 707;
+
+ROLLBACK;
+
+c. Napisz zapytanie, które zaczyna transakcję, dodaje nowy produkt do tabeli
+
+BEGIN TRANSACTION;
+
+INSERT INTO Production.Product (ProductID,ProductName,Price)
+VALUES (800, 'Nowy Produkt', 29.99);
+
+COMMIT;
